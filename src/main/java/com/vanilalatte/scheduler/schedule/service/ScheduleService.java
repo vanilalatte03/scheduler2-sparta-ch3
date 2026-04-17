@@ -3,6 +3,8 @@ package com.vanilalatte.scheduler.schedule.service;
 import com.vanilalatte.scheduler.schedule.dto.*;
 import com.vanilalatte.scheduler.schedule.entity.Schedule;
 import com.vanilalatte.scheduler.schedule.repository.ScheduleRepository;
+import com.vanilalatte.scheduler.user.repository.UserRepository;
+import com.vanilalatte.scheduler.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,16 +17,17 @@ import java.util.List;
 public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
+    private final UserService userService;
 
     @Transactional
     public CreateScheduleResponse create(CreateScheduleRequest request) {
-        Schedule schedule = new Schedule(request.getTitle(), request.getContent(), request.getUserName());
+        Schedule schedule = new Schedule(userService.findByUserId(request.getUserId()), request.getTitle(), request.getContent());
         Schedule savedSchedules = scheduleRepository.save(schedule);
         return new CreateScheduleResponse(
                 savedSchedules.getId(),
                 savedSchedules.getTitle(),
                 savedSchedules.getContent(),
-                savedSchedules.getUserName(),
+                savedSchedules.getUser().getId(),
                 savedSchedules.getCreatedAt(),
                 savedSchedules.getModifiedAt()
         );
@@ -39,7 +42,7 @@ public class ScheduleService {
                     schedule.getId(),
                     schedule.getTitle(),
                     schedule.getContent(),
-                    schedule.getUserName(),
+                    schedule.getUser().getId(),
                     schedule.getCreatedAt(),
                     schedule.getModifiedAt()
             );
@@ -57,7 +60,7 @@ public class ScheduleService {
               schedule.getId(),
               schedule.getTitle(),
               schedule.getContent(),
-              schedule.getUserName(),
+              schedule.getUser().getId(),
               schedule.getCreatedAt(),
               schedule.getModifiedAt()
       );
@@ -74,7 +77,7 @@ public class ScheduleService {
                 schedule.getId(),
                 schedule.getTitle(),
                 schedule.getContent(),
-                schedule.getUserName(),
+                schedule.getUser().getId(),
                 schedule.getCreatedAt(),
                 schedule.getModifiedAt()
         );
@@ -82,8 +85,8 @@ public class ScheduleService {
 
     @Transactional
     public void delete(Long scheduleId) {
-        boolean exist = scheduleRepository.existsById(scheduleId);
-        if (!exist) {
+        boolean exists = scheduleRepository.existsById(scheduleId);
+        if (!exists) {
             throw new IllegalStateException("없는 일정 입니다.");
         }
         scheduleRepository.deleteById(scheduleId);

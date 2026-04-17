@@ -1,6 +1,7 @@
 package com.vanilalatte.scheduler.schedule.entity;
 
 import com.vanilalatte.scheduler.global.entity.BaseEntity;
+import com.vanilalatte.scheduler.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -19,7 +20,9 @@ public class Schedule extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String userName;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Column(nullable = false, length = 30)
     private String title;
@@ -30,12 +33,11 @@ public class Schedule extends BaseEntity {
     /**
      * 일정 엔티티를 생성한다.
      *
-     * @param userName 작성 유저명
      * @param title 할일 제목
      * @param content 할일 내용
      */
-    public Schedule(String userName, String title, String content){
-        this.userName = userName;
+    public Schedule(User user, String title, String content){
+        this.user = user;
         this.title = title;
         this.content = content;
     }
