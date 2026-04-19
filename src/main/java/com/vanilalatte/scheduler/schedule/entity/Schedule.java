@@ -33,6 +33,7 @@ public class Schedule extends BaseEntity {
     /**
      * 일정 엔티티를 생성한다.
      *
+     * @param user 유저
      * @param title 할일 제목
      * @param content 할일 내용
      */

@@ -2,10 +2,12 @@ package com.vanilalatte.scheduler.schedule.controller;
 
 import com.vanilalatte.scheduler.schedule.dto.*;
 import com.vanilalatte.scheduler.schedule.service.ScheduleService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -17,8 +19,15 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @PostMapping
-    public ResponseEntity<CreateScheduleResponse> createSchedule(@RequestBody CreateScheduleRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.create(request));
+    public ResponseEntity<CreateScheduleResponse> createSchedule(
+            @RequestBody CreateScheduleRequest request,
+            HttpSession session
+    ) {
+        Long loginUserId = (Long) session.getAttribute("userId");
+        if (loginUserId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.create(loginUserId, request));
     }
 
     @GetMapping
@@ -34,19 +43,27 @@ public class ScheduleController {
     @PatchMapping("/{scheduleId}")
     public ResponseEntity<UpdateScheduleResponse> updateSchedule(
             @PathVariable Long scheduleId,
-            @RequestBody UpdateScheduleRequest request
+            @RequestBody UpdateScheduleRequest request,
+            HttpSession session
     ) {
-        return ResponseEntity.ok().body(scheduleService.update(scheduleId, request));
+        Long loginUserId = (Long) session.getAttribute("userId");
+        if (loginUserId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+        return ResponseEntity.ok().body(scheduleService.update(scheduleId, loginUserId, request));
     }
 
     @DeleteMapping("/{scheduleId}")
-    public ResponseEntity<Void> deleteSchedule(@PathVariable Long scheduleId) {
-        scheduleService.delete(scheduleId);
+    public ResponseEntity<Void> deleteSchedule(
+            @PathVariable Long scheduleId,
+            HttpSession session
+    ) {
+        Long loginUserId = (Long) session.getAttribute("userId");
+        if (loginUserId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+        scheduleService.delete(scheduleId, loginUserId);
         return ResponseEntity.noContent().build();
     }
-
-
-
-
 
 }

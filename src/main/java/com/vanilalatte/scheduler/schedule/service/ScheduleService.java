@@ -3,11 +3,12 @@ package com.vanilalatte.scheduler.schedule.service;
 import com.vanilalatte.scheduler.schedule.dto.*;
 import com.vanilalatte.scheduler.schedule.entity.Schedule;
 import com.vanilalatte.scheduler.schedule.repository.ScheduleRepository;
-import com.vanilalatte.scheduler.user.repository.UserRepository;
 import com.vanilalatte.scheduler.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,17 +21,14 @@ public class ScheduleService {
     private final UserService userService;
 
     @Transactional
-    public CreateScheduleResponse create(CreateScheduleRequest request) {
-        Schedule schedule = new Schedule(userService.findByUserId(request.getUserId()), request.getTitle(), request.getContent());
-        Schedule savedSchedules = scheduleRepository.save(schedule);
-        return new CreateScheduleResponse(
-                savedSchedules.getId(),
-                savedSchedules.getTitle(),
-                savedSchedules.getContent(),
-                savedSchedules.getUser().getId(),
-                savedSchedules.getCreatedAt(),
-                savedSchedules.getModifiedAt()
+    public CreateScheduleResponse create(Long loginUserId, CreateScheduleRequest request) {
+        Schedule schedule = new Schedule(
+                userService.findByUserId(loginUserId),
+                request.getTitle(),
+                request.getContent()
         );
+        Schedule savedSchedules = scheduleRepository.save(schedule);
+        return CreateScheduleResponse.from(savedSchedules);
     }
 
     @Transactional(readOnly = true)
@@ -67,10 +65,14 @@ public class ScheduleService {
     }
 
     @Transactional
-    public UpdateScheduleResponse update(Long scheduleId, UpdateScheduleRequest request) {
+    public UpdateScheduleResponse update(Long scheduleId, Long loginUserId, UpdateScheduleRequest request) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new IllegalStateException("없는 일정 입니다.")
         );
+
+        if (!schedule.getUser().getId().equals(loginUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "수정 권한이 없습니다.");
+        }
 
         schedule.update(request.getTitle(), request.getContent());
         return new UpdateScheduleResponse(
@@ -84,11 +86,15 @@ public class ScheduleService {
     }
 
     @Transactional
-    public void delete(Long scheduleId) {
-        boolean exists = scheduleRepository.existsById(scheduleId);
-        if (!exists) {
-            throw new IllegalStateException("없는 일정 입니다.");
+    public void delete(Long scheduleId, Long loginUserId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new IllegalStateException("없는 일정 입니다.")
+        );
+
+        if (!schedule.getUser().getId().equals(loginUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "삭제 권한이 없습니다.");
         }
-        scheduleRepository.deleteById(scheduleId);
+
+        scheduleRepository.delete(schedule);
     }
 }

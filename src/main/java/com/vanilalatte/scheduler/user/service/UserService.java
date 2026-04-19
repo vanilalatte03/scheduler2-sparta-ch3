@@ -4,8 +4,10 @@ import com.vanilalatte.scheduler.user.dto.*;
 import com.vanilalatte.scheduler.user.entity.User;
 import com.vanilalatte.scheduler.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +63,11 @@ public class UserService {
     }
 
     @Transactional
-    public UpdateUserResponse update(Long userId, UpdateUserRequest request) {
+    public UpdateUserResponse update(Long userId, Long loginUserId, UpdateUserRequest request) {
+        if (!userId.equals(loginUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인만 수정 가능합니다.");
+        }
+
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new IllegalStateException("없는 유저 입니다.")
         );
@@ -78,12 +84,16 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(Long userId) {
-        boolean exists = userRepository.existsById(userId);
-        if(!exists) {
-            throw new IllegalStateException("없는 유저 입니다.");
+    public void delete(Long userId, Long loginUserId) {
+        if (!userId.equals(loginUserId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인만 삭제 가능합니다.");
         }
-        userRepository.deleteById(userId);
+
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalStateException("없는 유저 입니다.")
+        );
+
+        userRepository.delete(user);
     }
 
     public User findByUserId(Long userId) {
@@ -91,5 +101,18 @@ public class UserService {
                 () -> new IllegalStateException("없는 유저 입니다.")
         );
         return user;
+    }
+
+
+    @Transactional
+    public Long login(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다."));
+
+        if (!user.getPassword().equals(password)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다.");
+        }
+
+        return user.getId();
     }
 }
