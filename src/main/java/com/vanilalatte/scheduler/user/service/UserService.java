@@ -1,5 +1,6 @@
 package com.vanilalatte.scheduler.user.service;
 
+import com.vanilalatte.scheduler.global.config.PasswordEncoder;
 import com.vanilalatte.scheduler.user.dto.*;
 import com.vanilalatte.scheduler.user.entity.User;
 import com.vanilalatte.scheduler.user.repository.UserRepository;
@@ -17,10 +18,15 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public CreateUserResponse save(CreateUserRequest request) {
-        User user = new User(request.getUserName(), request.getEmail(), request.getPassword());
+        String rawPassword = request.getPassword();
+
+        String encodedPassword = passwordEncoder.encode(rawPassword);
+
+        User user = new User(request.getUserName(), request.getEmail(), encodedPassword);
         User savedUser = userRepository.save(user);
         return new CreateUserResponse(
                 savedUser.getId(),
@@ -29,6 +35,7 @@ public class UserService {
                 savedUser.getCreatedAt(),
                 savedUser.getModifiedAt()
         );
+
     }
 
     @Transactional(readOnly = true)
@@ -109,7 +116,7 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다."));
 
-        if (!user.getPassword().equals(password)) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다.");
         }
 
