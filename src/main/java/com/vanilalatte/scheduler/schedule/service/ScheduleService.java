@@ -23,7 +23,7 @@ public class ScheduleService {
     @Transactional
     public CreateScheduleResponse create(Long loginUserId, CreateScheduleRequest request) {
         Schedule schedule = new Schedule(
-                userService.findByUserId(loginUserId),
+                userService.findUserById(loginUserId),
                 request.getTitle(),
                 request.getContent()
         );
@@ -52,7 +52,7 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public GetScheduleResponse getOne(Long scheduleId) {
       Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-              () -> new IllegalStateException("없는 일정 입니다.")
+              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 일정입니다.")
       );
       return new GetScheduleResponse(
               schedule.getId(),
@@ -67,7 +67,7 @@ public class ScheduleService {
     @Transactional
     public UpdateScheduleResponse update(Long scheduleId, Long loginUserId, UpdateScheduleRequest request) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                () -> new IllegalStateException("없는 일정 입니다.")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 일정입니다.")
         );
 
         if (!schedule.getUser().getId().equals(loginUserId)) {
@@ -88,7 +88,7 @@ public class ScheduleService {
     @Transactional
     public void delete(Long scheduleId, Long loginUserId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                () -> new IllegalStateException("없는 일정 입니다.")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 일정입니다.")
         );
 
         if (!schedule.getUser().getId().equals(loginUserId)) {
@@ -96,5 +96,13 @@ public class ScheduleService {
         }
 
         scheduleRepository.delete(schedule);
+    }
+
+    @Transactional(readOnly = true)
+    public Schedule findScheduleById(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 일정입니다.")
+        );
+        return schedule;
     }
 }

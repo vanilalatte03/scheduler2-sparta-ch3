@@ -58,7 +58,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public GetUserResponse getOne(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalStateException("없는 유저 입니다.")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다.")
         );
         return new GetUserResponse(
                 user.getId(),
@@ -76,7 +76,7 @@ public class UserService {
         }
 
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalStateException("없는 유저 입니다.")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다.")
         );
 
         user.update(request.getUserName(), request.getEmail());
@@ -97,21 +97,22 @@ public class UserService {
         }
 
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalStateException("없는 유저 입니다.")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다.")
         );
 
         userRepository.delete(user);
     }
 
-    public User findByUserId(Long userId) {
+    @Transactional(readOnly = true)
+    public User findUserById(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalStateException("없는 유저 입니다.")
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다.")
         );
         return user;
     }
 
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Long login(String email, String password) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다."));
