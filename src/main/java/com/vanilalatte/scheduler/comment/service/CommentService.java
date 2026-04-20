@@ -4,7 +4,6 @@ import com.vanilalatte.scheduler.comment.dto.*;
 import com.vanilalatte.scheduler.comment.entity.Comment;
 import com.vanilalatte.scheduler.comment.repository.CommentRepository;
 import com.vanilalatte.scheduler.global.exception.CommentNotFoundException;
-import com.vanilalatte.scheduler.global.exception.ForbiddenException;
 import com.vanilalatte.scheduler.schedule.entity.Schedule;
 import com.vanilalatte.scheduler.schedule.service.ScheduleService;
 import com.vanilalatte.scheduler.user.entity.User;
@@ -27,36 +26,25 @@ public class CommentService {
     @Transactional
     public CreateCommentResponse create(Long scheduleId, Long loginUserId, CreateCommentRequest request) {
         Schedule schedule = scheduleService.findScheduleById(scheduleId);
-
         User user = userService.findUserById(loginUserId);
-
         Comment comment = new Comment(schedule, user, request.getContent());
         Comment saveComment = commentRepository.save(comment);
-
         return CreateCommentResponse.from(saveComment);
-
     }
 
     @Transactional(readOnly = true)
     public List<GetCommentResponse> getAll(Long scheduleId) {
         scheduleService.findScheduleById(scheduleId);
 
-        List<Comment> comments = commentRepository.findAllByScheduleId(scheduleId);
-        List<GetCommentResponse> dtos = new ArrayList<>();
-        for(Comment comment : comments){
-            dtos.add(GetCommentResponse.from(comment));
-        }
-        return dtos;
+        return commentRepository.findAllByScheduleId(scheduleId).stream()
+                .map(GetCommentResponse::from)
+                .toList();
     }
 
     @Transactional
     public UpdateCommentResponse update(Long commentId, Long loginUserId, UpdateCommentRequest request) {
         Comment comment = findCommentById(commentId);
-
-        if(!comment.getUser().getId().equals(loginUserId)){
-            throw new ForbiddenException("수정 권한이 없습니다.");
-        }
-
+        comment.validateOwner(loginUserId);
         comment.update(request.getContent());
         return UpdateCommentResponse.from(comment);
     }
@@ -64,16 +52,12 @@ public class CommentService {
     @Transactional
     public void delete(Long commentId, Long loginUserId) {
         Comment comment = findCommentById(commentId);
-
-        if(!comment.getUser().getId().equals(loginUserId)){
-            throw new ForbiddenException("삭제 권한이 없습니다.");
-        }
-
+        comment.validateOwner(loginUserId);
         commentRepository.delete(comment);
     }
 
     @Transactional(readOnly = true)
-    public Comment findCommentById(Long commentId){
+    public Comment findCommentById(Long commentId) {
         return commentRepository.findById(commentId).orElseThrow(
                 () -> new CommentNotFoundException("존재하지 않는 댓글입니다.")
         );

@@ -1,6 +1,7 @@
 package com.vanilalatte.scheduler.schedule.entity;
 
 import com.vanilalatte.scheduler.global.entity.BaseEntity;
+import com.vanilalatte.scheduler.global.exception.ForbiddenException;
 import com.vanilalatte.scheduler.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -37,7 +38,7 @@ public class Schedule extends BaseEntity {
      * @param title 할일 제목
      * @param content 할일 내용
      */
-    public Schedule(User user, String title, String content){
+    public Schedule(User user, String title, String content) {
         this.user = user;
         this.title = title;
         this.content = content;
@@ -45,6 +46,12 @@ public class Schedule extends BaseEntity {
 
     public void update(String title, String content) {
         this.title = title;
-        this.content= content;
+        this.content = content;
+    }
+
+    public void validateOwner(Long loginUserId) {
+        if (!this.user.getId().equals(loginUserId)) {
+            throw new ForbiddenException("해당 권한이 없습니다.");
+        }
     }
 }

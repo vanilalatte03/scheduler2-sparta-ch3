@@ -1,6 +1,5 @@
 package com.vanilalatte.scheduler.user.controller;
 
-import com.vanilalatte.scheduler.global.exception.UnauthorizedException;
 import com.vanilalatte.scheduler.global.util.SessionUtils;
 import com.vanilalatte.scheduler.user.dto.*;
 import com.vanilalatte.scheduler.user.service.UserService;
@@ -23,16 +22,16 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<CreateUserResponse> createUser(@RequestBody @Valid CreateUserRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<GetUserResponse>> getUsers(){
+    public ResponseEntity<List<GetUserResponse>> getUsers() {
         return ResponseEntity.ok().body(userService.getAll());
     }
 
     @GetMapping("{userId}")
-    public ResponseEntity<GetUserResponse> getUser(@PathVariable Long userId){
+    public ResponseEntity<GetUserResponse> getUser(@PathVariable Long userId) {
         return ResponseEntity.ok().body(userService.getOne(userId));
     }
 
@@ -41,7 +40,7 @@ public class UserController {
             @PathVariable Long userId,
             @RequestBody @Valid UpdateUserRequest request,
             HttpSession session
-    ){
+    ) {
         Long loginUserId = SessionUtils.getLoginUserId(session);
         return ResponseEntity.ok().body(userService.update(userId, loginUserId, request));
     }

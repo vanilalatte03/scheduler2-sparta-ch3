@@ -1,6 +1,5 @@
 package com.vanilalatte.scheduler.schedule.service;
 
-import com.vanilalatte.scheduler.global.exception.ForbiddenException;
 import com.vanilalatte.scheduler.global.exception.ScheduleNotFoundException;
 import com.vanilalatte.scheduler.schedule.dto.*;
 import com.vanilalatte.scheduler.schedule.entity.Schedule;
@@ -44,31 +43,22 @@ public class ScheduleService {
 
     @Transactional(readOnly = true)
     public GetScheduleResponse getOne(Long scheduleId) {
-      Schedule schedule = findScheduleById(scheduleId);
-      return GetScheduleResponse.from(schedule);
+        Schedule schedule = findScheduleById(scheduleId);
+        return GetScheduleResponse.from(schedule);
     }
 
     @Transactional
     public UpdateScheduleResponse update(Long scheduleId, Long loginUserId, UpdateScheduleRequest request) {
         Schedule schedule = findScheduleById(scheduleId);
-
-        if (!schedule.getUser().getId().equals(loginUserId)) {
-            throw new ForbiddenException("수정 권한이 없습니다.");
-        }
-
+        schedule.validateOwner(loginUserId);
         schedule.update(request.getTitle(), request.getContent());
         return UpdateScheduleResponse.from(schedule);
-
     }
 
     @Transactional
     public void delete(Long scheduleId, Long loginUserId) {
         Schedule schedule = findScheduleById(scheduleId);
-
-        if (!schedule.getUser().getId().equals(loginUserId)) {
-            throw new ForbiddenException("삭제 권한이 없습니다.");
-        }
-
+        schedule.validateOwner(loginUserId);
         scheduleRepository.delete(schedule);
     }
 
@@ -78,4 +68,5 @@ public class ScheduleService {
                 () -> new ScheduleNotFoundException("없는 일정입니다.")
         );
     }
+
 }

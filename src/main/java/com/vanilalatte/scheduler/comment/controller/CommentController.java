@@ -2,7 +2,6 @@ package com.vanilalatte.scheduler.comment.controller;
 
 import com.vanilalatte.scheduler.comment.dto.*;
 import com.vanilalatte.scheduler.comment.service.CommentService;
-import com.vanilalatte.scheduler.global.exception.UnauthorizedException;
 import com.vanilalatte.scheduler.global.util.SessionUtils;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;

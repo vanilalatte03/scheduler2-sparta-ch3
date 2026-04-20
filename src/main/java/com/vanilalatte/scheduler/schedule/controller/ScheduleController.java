@@ -1,6 +1,5 @@
 package com.vanilalatte.scheduler.schedule.controller;
 
-import com.vanilalatte.scheduler.global.exception.UnauthorizedException;
 import com.vanilalatte.scheduler.global.util.SessionUtils;
 import com.vanilalatte.scheduler.schedule.dto.*;
 import com.vanilalatte.scheduler.schedule.service.ScheduleService;
@@ -28,7 +27,6 @@ public class ScheduleController {
         Long loginUserId = SessionUtils.getLoginUserId(session);
         return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.create(loginUserId, request));
     }
-
     @GetMapping
     public ResponseEntity<Page<GetSchedulePageResponse>> getSchedules(
             @RequestParam(defaultValue = "0") @Min(0) int page,

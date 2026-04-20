@@ -1,6 +1,7 @@
 package com.vanilalatte.scheduler.comment.entity;
 
 import com.vanilalatte.scheduler.global.entity.BaseEntity;
+import com.vanilalatte.scheduler.global.exception.ForbiddenException;
 import com.vanilalatte.scheduler.schedule.entity.Schedule;
 import com.vanilalatte.scheduler.user.entity.User;
 import jakarta.persistence.*;
@@ -37,5 +38,11 @@ public class Comment extends BaseEntity {
 
     public void update(String content) {
         this.content = content;
+    }
+
+    public void validateOwner(Long loginUserId) {
+        if (!this.user.getId().equals(loginUserId)) {
+            throw new ForbiddenException("삭제 권한이 없습니다.");
+        }
     }
 }
