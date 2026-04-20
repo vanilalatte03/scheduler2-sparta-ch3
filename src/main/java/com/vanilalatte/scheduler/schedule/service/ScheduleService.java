@@ -1,5 +1,7 @@
 package com.vanilalatte.scheduler.schedule.service;
 
+import com.vanilalatte.scheduler.global.exception.ForbiddenException;
+import com.vanilalatte.scheduler.global.exception.ScheduleNotFoundException;
 import com.vanilalatte.scheduler.schedule.dto.*;
 import com.vanilalatte.scheduler.schedule.entity.Schedule;
 import com.vanilalatte.scheduler.schedule.repository.ScheduleRepository;
@@ -9,10 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -44,20 +44,16 @@ public class ScheduleService {
 
     @Transactional(readOnly = true)
     public GetScheduleResponse getOne(Long scheduleId) {
-      Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 일정입니다.")
-      );
+      Schedule schedule = findScheduleById(scheduleId);
       return GetScheduleResponse.from(schedule);
     }
 
     @Transactional
     public UpdateScheduleResponse update(Long scheduleId, Long loginUserId, UpdateScheduleRequest request) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 일정입니다.")
-        );
+        Schedule schedule = findScheduleById(scheduleId);
 
         if (!schedule.getUser().getId().equals(loginUserId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "수정 권한이 없습니다.");
+            throw new ForbiddenException("수정 권한이 없습니다.");
         }
 
         schedule.update(request.getTitle(), request.getContent());
@@ -67,12 +63,10 @@ public class ScheduleService {
 
     @Transactional
     public void delete(Long scheduleId, Long loginUserId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 일정입니다.")
-        );
+        Schedule schedule = findScheduleById(scheduleId);
 
         if (!schedule.getUser().getId().equals(loginUserId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "삭제 권한이 없습니다.");
+            throw new ForbiddenException("삭제 권한이 없습니다.");
         }
 
         scheduleRepository.delete(schedule);
@@ -80,9 +74,8 @@ public class ScheduleService {
 
     @Transactional(readOnly = true)
     public Schedule findScheduleById(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 일정입니다.")
+        return scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new ScheduleNotFoundException("없는 일정입니다.")
         );
-        return schedule;
     }
 }

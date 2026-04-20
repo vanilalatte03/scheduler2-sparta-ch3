@@ -3,15 +3,15 @@ package com.vanilalatte.scheduler.comment.service;
 import com.vanilalatte.scheduler.comment.dto.*;
 import com.vanilalatte.scheduler.comment.entity.Comment;
 import com.vanilalatte.scheduler.comment.repository.CommentRepository;
+import com.vanilalatte.scheduler.global.exception.CommentNotFoundException;
+import com.vanilalatte.scheduler.global.exception.ForbiddenException;
 import com.vanilalatte.scheduler.schedule.entity.Schedule;
 import com.vanilalatte.scheduler.schedule.service.ScheduleService;
 import com.vanilalatte.scheduler.user.entity.User;
 import com.vanilalatte.scheduler.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +39,8 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public List<GetCommentResponse> getAll(Long scheduleId) {
+        scheduleService.findScheduleById(scheduleId);
+
         List<Comment> comments = commentRepository.findAllByScheduleId(scheduleId);
         List<GetCommentResponse> dtos = new ArrayList<>();
         for(Comment comment : comments){
@@ -49,12 +51,10 @@ public class CommentService {
 
     @Transactional
     public UpdateCommentResponse update(Long commentId, Long loginUserId, UpdateCommentRequest request) {
-        Comment comment = commentRepository.findById(commentId).orElseThrow(
-                () -> new IllegalStateException("존재하지 않는 댓글입니다.")
-        );
+        Comment comment = findCommentById(commentId);
 
         if(!comment.getUser().getId().equals(loginUserId)){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "수정 권한이 없습니다.");
+            throw new ForbiddenException("수정 권한이 없습니다.");
         }
 
         comment.update(request.getContent());
@@ -63,14 +63,19 @@ public class CommentService {
 
     @Transactional
     public void delete(Long commentId, Long loginUserId) {
-        Comment comment = commentRepository.findById(commentId).orElseThrow(
-                () -> new IllegalStateException("존재하지 않는 댓글입니다.")
-        );
+        Comment comment = findCommentById(commentId);
 
         if(!comment.getUser().getId().equals(loginUserId)){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "삭제 권한이 없습니다.");
+            throw new ForbiddenException("삭제 권한이 없습니다.");
         }
 
         commentRepository.delete(comment);
+    }
+
+    @Transactional(readOnly = true)
+    public Comment findCommentById(Long commentId){
+        return commentRepository.findById(commentId).orElseThrow(
+                () -> new CommentNotFoundException("존재하지 않는 댓글입니다.")
+        );
     }
 }

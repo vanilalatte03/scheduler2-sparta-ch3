@@ -1,14 +1,16 @@
 package com.vanilalatte.scheduler.user.service;
 
 import com.vanilalatte.scheduler.global.config.PasswordEncoder;
+import com.vanilalatte.scheduler.global.exception.DuplicateEmailException;
+import com.vanilalatte.scheduler.global.exception.ForbiddenException;
+import com.vanilalatte.scheduler.global.exception.UnauthorizedException;
+import com.vanilalatte.scheduler.global.exception.UserNotFoundException;
 import com.vanilalatte.scheduler.user.dto.*;
 import com.vanilalatte.scheduler.user.entity.User;
 import com.vanilalatte.scheduler.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,14 +24,16 @@ public class UserService {
 
     @Transactional
     public CreateUserResponse save(CreateUserRequest request) {
-        String rawPassword = request.getPassword();
+        userRepository.findByEmail(request.getEmail())
+                .ifPresent(user -> {
+                    throw new DuplicateEmailException("이미 존재하는 이메일입니다.");
+                });
 
-        String encodedPassword = passwordEncoder.encode(rawPassword);
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         User user = new User(request.getUserName(), request.getEmail(), encodedPassword);
         User savedUser = userRepository.save(user);
         return CreateUserResponse.from(savedUser);
-
     }
 
     @Transactional(readOnly = true)
@@ -44,21 +48,24 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public GetUserResponse getOne(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다.")
-        );
+        User user = findUserById(userId);
         return GetUserResponse.from(user);
     }
 
     @Transactional
     public UpdateUserResponse update(Long userId, Long loginUserId, UpdateUserRequest request) {
         if (!userId.equals(loginUserId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인만 수정 가능합니다.");
+            throw new ForbiddenException("본인만 수정 가능합니다.");
         }
 
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다.")
-        );
+        User user = findUserById(userId);
+
+        userRepository.findByEmail(request.getEmail())
+                .ifPresent(foundUser -> {
+                    if (!foundUser.getId().equals(userId)) {
+                        throw new DuplicateEmailException("이미 존재하는 이메일입니다.");
+                    }
+                });
 
         user.update(request.getUserName(), request.getEmail());
         return UpdateUserResponse.from(user);
@@ -67,31 +74,28 @@ public class UserService {
     @Transactional
     public void delete(Long userId, Long loginUserId) {
         if (!userId.equals(loginUserId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인만 삭제 가능합니다.");
+            throw new ForbiddenException("본인만 삭제 가능합니다.");
         }
 
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다.")
-        );
+        User user = findUserById(userId);
 
         userRepository.delete(user);
     }
 
     @Transactional(readOnly = true)
     public User findUserById(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다.")
+        return userRepository.findById(userId).orElseThrow(
+                () -> new UserNotFoundException("존재하지 않는 유저입니다.")
         );
-        return user;
     }
 
     @Transactional(readOnly = true)
     public Long login(String email, String password) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다."));
+                .orElseThrow(() -> new UnauthorizedException("이메일 또는 비밀번호가 일치하지 않습니다."));
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다.");
+            throw new UnauthorizedException("이메일 또는 비밀번호가 일치하지 않습니다.");
         }
 
         return user.getId();

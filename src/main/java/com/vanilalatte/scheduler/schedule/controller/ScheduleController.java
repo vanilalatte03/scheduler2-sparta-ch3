@@ -1,15 +1,16 @@
 package com.vanilalatte.scheduler.schedule.controller;
 
+import com.vanilalatte.scheduler.global.exception.UnauthorizedException;
 import com.vanilalatte.scheduler.schedule.dto.*;
 import com.vanilalatte.scheduler.schedule.service.ScheduleService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,15 +26,15 @@ public class ScheduleController {
     ) {
         Long loginUserId = (Long) session.getAttribute("userId");
         if (loginUserId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+            throw new UnauthorizedException("로그인이 필요합니다.");
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.create(loginUserId, request));
     }
 
     @GetMapping
     public ResponseEntity<Page<GetSchedulePageResponse>> getSchedules(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) int size
     ) {
         return ResponseEntity.ok(scheduleService.getAll(page, size));
     }
@@ -51,7 +52,7 @@ public class ScheduleController {
     ) {
         Long loginUserId = (Long) session.getAttribute("userId");
         if (loginUserId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+            throw new UnauthorizedException("로그인이 필요합니다.");
         }
         return ResponseEntity.ok().body(scheduleService.update(scheduleId, loginUserId, request));
     }
@@ -63,7 +64,7 @@ public class ScheduleController {
     ) {
         Long loginUserId = (Long) session.getAttribute("userId");
         if (loginUserId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+            throw new UnauthorizedException("로그인이 필요합니다.");
         }
         scheduleService.delete(scheduleId, loginUserId);
         return ResponseEntity.noContent().build();

@@ -1,5 +1,6 @@
 package com.vanilalatte.scheduler.user.controller;
 
+import com.vanilalatte.scheduler.global.exception.UnauthorizedException;
 import com.vanilalatte.scheduler.user.dto.*;
 import com.vanilalatte.scheduler.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -43,7 +43,7 @@ public class UserController {
     ){
         Long loginUserId = (Long) session.getAttribute("userId");
         if (loginUserId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+            throw new UnauthorizedException("로그인이 필요합니다.");
         }
         return ResponseEntity.ok().body(userService.update(userId, loginUserId, request));
     }
@@ -55,7 +55,7 @@ public class UserController {
     ) {
         Long loginUserId = (Long) session.getAttribute("userId");
         if (loginUserId == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+            throw new UnauthorizedException("로그인이 필요합니다.");
         }
         userService.delete(userId, loginUserId);
         return ResponseEntity.noContent().build();
