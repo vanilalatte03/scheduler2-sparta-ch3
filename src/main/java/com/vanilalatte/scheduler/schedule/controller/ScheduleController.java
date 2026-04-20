@@ -1,6 +1,7 @@
 package com.vanilalatte.scheduler.schedule.controller;
 
 import com.vanilalatte.scheduler.global.exception.UnauthorizedException;
+import com.vanilalatte.scheduler.global.util.SessionUtils;
 import com.vanilalatte.scheduler.schedule.dto.*;
 import com.vanilalatte.scheduler.schedule.service.ScheduleService;
 import jakarta.servlet.http.HttpSession;
@@ -24,10 +25,7 @@ public class ScheduleController {
             @RequestBody @Valid CreateScheduleRequest request,
             HttpSession session
     ) {
-        Long loginUserId = (Long) session.getAttribute("userId");
-        if (loginUserId == null) {
-            throw new UnauthorizedException("로그인이 필요합니다.");
-        }
+        Long loginUserId = SessionUtils.getLoginUserId(session);
         return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.create(loginUserId, request));
     }
 
@@ -50,10 +48,7 @@ public class ScheduleController {
             @RequestBody @Valid UpdateScheduleRequest request,
             HttpSession session
     ) {
-        Long loginUserId = (Long) session.getAttribute("userId");
-        if (loginUserId == null) {
-            throw new UnauthorizedException("로그인이 필요합니다.");
-        }
+        Long loginUserId = SessionUtils.getLoginUserId(session);
         return ResponseEntity.ok().body(scheduleService.update(scheduleId, loginUserId, request));
     }
 
@@ -62,10 +57,7 @@ public class ScheduleController {
             @PathVariable Long scheduleId,
             HttpSession session
     ) {
-        Long loginUserId = (Long) session.getAttribute("userId");
-        if (loginUserId == null) {
-            throw new UnauthorizedException("로그인이 필요합니다.");
-        }
+        Long loginUserId = SessionUtils.getLoginUserId(session);
         scheduleService.delete(scheduleId, loginUserId);
         return ResponseEntity.noContent().build();
     }

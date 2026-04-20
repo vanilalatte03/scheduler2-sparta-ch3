@@ -3,6 +3,7 @@ package com.vanilalatte.scheduler.comment.controller;
 import com.vanilalatte.scheduler.comment.dto.*;
 import com.vanilalatte.scheduler.comment.service.CommentService;
 import com.vanilalatte.scheduler.global.exception.UnauthorizedException;
+import com.vanilalatte.scheduler.global.util.SessionUtils;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +25,7 @@ public class CommentController {
             @RequestBody @Valid CreateCommentRequest request,
             HttpSession session
     ) {
-        Long loginUserId = (Long) session.getAttribute("userId");
-        if (loginUserId == null) {
-            throw new UnauthorizedException("로그인이 필요합니다.");
-        }
+        Long loginUserId = SessionUtils.getLoginUserId(session);
         return ResponseEntity.status(HttpStatus.CREATED).body(commentService.create(scheduleId, loginUserId, request));
     }
 
@@ -44,10 +42,7 @@ public class CommentController {
             @RequestBody @Valid UpdateCommentRequest request,
             HttpSession session
     ) {
-        Long loginUserId = (Long) session.getAttribute("userId");
-        if (loginUserId == null) {
-            throw new UnauthorizedException("로그인이 필요합니다.");
-        }
+        Long loginUserId = SessionUtils.getLoginUserId(session);
         return ResponseEntity.ok().body(commentService.update(commentId, loginUserId, request));
     }
 
@@ -56,10 +51,7 @@ public class CommentController {
             @PathVariable Long commentId,
             HttpSession session
     ) {
-        Long loginUserId = (Long) session.getAttribute("userId");
-        if (loginUserId == null) {
-            throw new UnauthorizedException("로그인이 필요합니다.");
-        }
+        Long loginUserId = SessionUtils.getLoginUserId(session);
         commentService.delete(commentId, loginUserId);
         return ResponseEntity.noContent().build();
     }
