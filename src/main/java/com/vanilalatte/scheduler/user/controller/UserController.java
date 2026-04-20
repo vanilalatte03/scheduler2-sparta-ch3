@@ -1,7 +1,6 @@
 package com.vanilalatte.scheduler.user.controller;
 
 import com.vanilalatte.scheduler.user.dto.*;
-import com.vanilalatte.scheduler.user.entity.User;
 import com.vanilalatte.scheduler.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;

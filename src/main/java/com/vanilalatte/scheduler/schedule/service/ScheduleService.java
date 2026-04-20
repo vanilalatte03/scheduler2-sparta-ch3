@@ -36,15 +36,7 @@ public class ScheduleService {
         List<Schedule> schedules = scheduleRepository.findAll();
         List<GetScheduleResponse> dtos = new ArrayList<>();
         for (Schedule schedule : schedules){
-            GetScheduleResponse dto = new GetScheduleResponse(
-                    schedule.getId(),
-                    schedule.getTitle(),
-                    schedule.getContent(),
-                    schedule.getUser().getId(),
-                    schedule.getCreatedAt(),
-                    schedule.getModifiedAt()
-            );
-            dtos.add(dto);
+            dtos.add(GetScheduleResponse.from(schedule));
         }
         return dtos;
     }
@@ -54,14 +46,7 @@ public class ScheduleService {
       Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
               () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "없는 일정입니다.")
       );
-      return new GetScheduleResponse(
-              schedule.getId(),
-              schedule.getTitle(),
-              schedule.getContent(),
-              schedule.getUser().getId(),
-              schedule.getCreatedAt(),
-              schedule.getModifiedAt()
-      );
+      return GetScheduleResponse.from(schedule);
     }
 
     @Transactional
@@ -75,14 +60,8 @@ public class ScheduleService {
         }
 
         schedule.update(request.getTitle(), request.getContent());
-        return new UpdateScheduleResponse(
-                schedule.getId(),
-                schedule.getTitle(),
-                schedule.getContent(),
-                schedule.getUser().getId(),
-                schedule.getCreatedAt(),
-                schedule.getModifiedAt()
-        );
+        return UpdateScheduleResponse.from(schedule);
+
     }
 
     @Transactional

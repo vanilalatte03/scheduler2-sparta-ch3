@@ -28,13 +28,7 @@ public class UserService {
 
         User user = new User(request.getUserName(), request.getEmail(), encodedPassword);
         User savedUser = userRepository.save(user);
-        return new CreateUserResponse(
-                savedUser.getId(),
-                savedUser.getUserName(),
-                savedUser.getEmail(),
-                savedUser.getCreatedAt(),
-                savedUser.getModifiedAt()
-        );
+        return CreateUserResponse.from(savedUser);
 
     }
 
@@ -43,14 +37,7 @@ public class UserService {
         List<User> users = userRepository.findAll();
         List<GetUserResponse> dtos = new ArrayList<>();
         for (User user : users) {
-            GetUserResponse dto = new GetUserResponse(
-                    user.getId(),
-                    user.getUserName(),
-                    user.getEmail(),
-                    user.getCreatedAt(),
-                    user.getModifiedAt()
-            );
-            dtos.add(dto);
+            dtos.add(GetUserResponse.from(user));
         }
         return dtos;
     }
@@ -60,13 +47,7 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 유저입니다.")
         );
-        return new GetUserResponse(
-                user.getId(),
-                user.getUserName(),
-                user.getEmail(),
-                user.getCreatedAt(),
-                user.getModifiedAt()
-        );
+        return GetUserResponse.from(user);
     }
 
     @Transactional
@@ -80,14 +61,7 @@ public class UserService {
         );
 
         user.update(request.getUserName(), request.getEmail());
-        return new UpdateUserResponse(
-                user.getId(),
-                user.getUserName(),
-                user.getEmail(),
-                user.getCreatedAt(),
-                user.getModifiedAt()
-        );
-
+        return UpdateUserResponse.from(user);
     }
 
     @Transactional
