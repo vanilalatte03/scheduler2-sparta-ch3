@@ -7,5 +7,4 @@ public class UpdateScheduleRequest {
 
     private String title;
     private String content;
-
 }

@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 @Getter
 public class UpdateCommentResponse {
+
     private final Long id;
     private final String content;
     private final Long userId;

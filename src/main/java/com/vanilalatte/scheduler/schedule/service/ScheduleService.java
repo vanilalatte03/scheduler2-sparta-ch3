@@ -5,13 +5,14 @@ import com.vanilalatte.scheduler.schedule.entity.Schedule;
 import com.vanilalatte.scheduler.schedule.repository.ScheduleRepository;
 import com.vanilalatte.scheduler.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,13 +33,13 @@ public class ScheduleService {
     }
 
     @Transactional(readOnly = true)
-    public List<GetScheduleResponse> getAll() {
-        List<Schedule> schedules = scheduleRepository.findAll();
-        List<GetScheduleResponse> dtos = new ArrayList<>();
-        for (Schedule schedule : schedules){
-            dtos.add(GetScheduleResponse.from(schedule));
-        }
-        return dtos;
+    public Page<GetSchedulePageResponse> getAll(int page, int size) {
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(Sort.Direction.DESC, "modifiedAt")
+        );
+        return scheduleRepository.findAllSchedulesPage(pageable);
     }
 
     @Transactional(readOnly = true)

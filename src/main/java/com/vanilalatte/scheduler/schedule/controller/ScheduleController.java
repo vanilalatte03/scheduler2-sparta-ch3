@@ -4,12 +4,11 @@ import com.vanilalatte.scheduler.schedule.dto.*;
 import com.vanilalatte.scheduler.schedule.service.ScheduleService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,8 +30,11 @@ public class ScheduleController {
     }
 
     @GetMapping
-    public ResponseEntity<List<GetScheduleResponse>> getSchedules() {
-        return ResponseEntity.ok().body(scheduleService.getAll());
+    public ResponseEntity<Page<GetSchedulePageResponse>> getSchedules(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(scheduleService.getAll(page, size));
     }
 
     @GetMapping("/{scheduleId}")

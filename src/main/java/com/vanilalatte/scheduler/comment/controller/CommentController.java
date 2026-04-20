@@ -62,9 +62,4 @@ public class CommentController {
         commentService.delete(commentId, loginUserId);
         return ResponseEntity.noContent().build();
     }
-
-
-
-
-
 }

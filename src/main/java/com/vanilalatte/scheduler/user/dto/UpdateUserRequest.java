@@ -7,5 +7,4 @@ public class UpdateUserRequest {
 
     private String userName;
     private String email;
-
 }
