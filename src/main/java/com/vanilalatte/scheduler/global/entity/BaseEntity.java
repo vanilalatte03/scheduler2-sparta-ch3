@@ -11,7 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 /**
- * 생성 시각과 수정 시각을 공통으로 관리하는 베이스 엔티티다.
+ * 생성 시각과 수정 시각을 공통으로 관리하는 베이스 엔티티입니다.
  */
 @Getter
 @MappedSuperclass

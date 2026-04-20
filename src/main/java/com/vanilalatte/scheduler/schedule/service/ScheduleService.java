@@ -33,6 +33,7 @@ public class ScheduleService {
 
     @Transactional(readOnly = true)
     public Page<GetSchedulePageResponse> getAll(int page, int size) {
+        // 최근 수정된 일정이 먼저 보이도록 수정일 기준으로 내림차순 정렬한다.
         Pageable pageable = PageRequest.of(
                 page,
                 size,

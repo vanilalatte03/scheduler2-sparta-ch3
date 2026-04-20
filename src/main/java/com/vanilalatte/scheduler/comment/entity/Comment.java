@@ -9,6 +9,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 일정에 작성된 댓글 정보를 나타내는 엔티티입니다.
+ */
 @Getter
 @Entity
 @Table(name = "comments")
@@ -40,6 +43,12 @@ public class Comment extends BaseEntity {
         this.content = content;
     }
 
+    /**
+     * 댓글 작성자가 현재 로그인 사용자와 같은지 검증합니다.
+     *
+     * @param loginUserId 로그인한 사용자 ID
+     * @throws ForbiddenException 작성자가 아니면 발생
+     */
     public void validateOwner(Long loginUserId) {
         if (!this.user.getId().equals(loginUserId)) {
             throw new ForbiddenException("삭제 권한이 없습니다.");

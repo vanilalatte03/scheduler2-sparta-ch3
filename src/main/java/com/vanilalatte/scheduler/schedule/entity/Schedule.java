@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * 일정 도메인을 표현하는 엔티티다.
+ * 일정 도메인을 표현하는 엔티티입니다.
  */
 @Getter
 @Entity
@@ -32,11 +32,11 @@ public class Schedule extends BaseEntity {
     private String content;
 
     /**
-     * 일정 엔티티를 생성한다.
+     * 일정을 생성합니다.
      *
-     * @param user 유저
-     * @param title 할일 제목
-     * @param content 할일 내용
+     * @param user 작성자
+     * @param title 일정 제목
+     * @param content 일정 내용
      */
     public Schedule(User user, String title, String content) {
         this.user = user;
@@ -49,6 +49,12 @@ public class Schedule extends BaseEntity {
         this.content = content;
     }
 
+    /**
+     * 로그인한 사용자가 현재 일정의 작성자인지 검증합니다.
+     *
+     * @param loginUserId 로그인한 사용자 ID
+     * @throws ForbiddenException 작성자가 아니면 발생
+     */
     public void validateOwner(Long loginUserId) {
         if (!this.user.getId().equals(loginUserId)) {
             throw new ForbiddenException("해당 권한이 없습니다.");

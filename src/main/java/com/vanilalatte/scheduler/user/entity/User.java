@@ -7,6 +7,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 사용자 정보를 나타내는 엔티티입니다.
+ */
 @Getter
 @Entity
 @Table(name = "users")
@@ -37,6 +40,12 @@ public class User extends BaseEntity {
         this.email = email;
     }
 
+    /**
+     * 로그인한 사용자가 현재 사용자 본인인지 검증합니다.
+     *
+     * @param loginUserId 로그인한 사용자 ID
+     * @throws ForbiddenException 본인이 아니면 발생
+     */
     public void validateSameUser(Long loginUserId) {
         if (!this.id.equals(loginUserId)) {
             throw new ForbiddenException("권한이 없습니다.");

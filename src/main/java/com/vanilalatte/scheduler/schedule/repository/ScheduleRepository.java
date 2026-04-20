@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
+    // 일정 목록 조회용 DTO 프로젝션 쿼리 (댓글 수, 작성자 이름 포함)
     @Query(
         value = """
             select new com.vanilalatte.scheduler.schedule.dto.GetSchedulePageResponse(

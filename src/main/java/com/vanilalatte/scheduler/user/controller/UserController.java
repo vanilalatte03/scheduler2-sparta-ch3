@@ -58,8 +58,11 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody @Valid LoginRequest request, HttpServletRequest httpRequest) {
         Long userid = userService.login(request.getEmail(), request.getPassword());
+
+        // 로그인 성공 시 세션을 생성하고 userId를 저장한다.
         HttpSession session = httpRequest.getSession(true);
         session.setAttribute("userId", userid);
+
         return ResponseEntity.ok("로그인 성공");
     }
 
