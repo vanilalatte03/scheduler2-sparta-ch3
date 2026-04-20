@@ -3,6 +3,7 @@ package com.vanilalatte.scheduler.schedule.controller;
 import com.vanilalatte.scheduler.schedule.dto.*;
 import com.vanilalatte.scheduler.schedule.service.ScheduleService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,7 @@ public class ScheduleController {
 
     @PostMapping
     public ResponseEntity<CreateScheduleResponse> createSchedule(
-            @RequestBody CreateScheduleRequest request,
+            @RequestBody @Valid CreateScheduleRequest request,
             HttpSession session
     ) {
         Long loginUserId = (Long) session.getAttribute("userId");
@@ -45,7 +46,7 @@ public class ScheduleController {
     @PatchMapping("/{scheduleId}")
     public ResponseEntity<UpdateScheduleResponse> updateSchedule(
             @PathVariable Long scheduleId,
-            @RequestBody UpdateScheduleRequest request,
+            @RequestBody @Valid UpdateScheduleRequest request,
             HttpSession session
     ) {
         Long loginUserId = (Long) session.getAttribute("userId");

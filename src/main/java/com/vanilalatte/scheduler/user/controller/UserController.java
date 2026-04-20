@@ -38,7 +38,7 @@ public class UserController {
     @PatchMapping("{userId}")
     public ResponseEntity<UpdateUserResponse> updateUser(
             @PathVariable Long userId,
-            @RequestBody UpdateUserRequest request,
+            @RequestBody @Valid UpdateUserRequest request,
             HttpSession session
     ){
         Long loginUserId = (Long) session.getAttribute("userId");
@@ -62,7 +62,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+    public ResponseEntity<String> login(@RequestBody @Valid LoginRequest request, HttpServletRequest httpRequest) {
         Long userid = userService.login(request.getEmail(), request.getPassword());
         HttpSession session = httpRequest.getSession(true);
         session.setAttribute("userId", userid);

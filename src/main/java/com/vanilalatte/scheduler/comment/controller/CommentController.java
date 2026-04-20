@@ -3,6 +3,7 @@ package com.vanilalatte.scheduler.comment.controller;
 import com.vanilalatte.scheduler.comment.dto.*;
 import com.vanilalatte.scheduler.comment.service.CommentService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class CommentController {
     @PostMapping("/schedules/{scheduleId}/comment")
     public ResponseEntity<CreateCommentResponse> createComment(
             @PathVariable Long scheduleId,
-            @RequestBody CreateCommentRequest request,
+            @RequestBody @Valid CreateCommentRequest request,
             HttpSession session
     ) {
         Long loginUserId = (Long) session.getAttribute("userId");
@@ -40,7 +41,7 @@ public class CommentController {
     @PatchMapping("comment/{commentId}")
     private ResponseEntity<UpdateCommentResponse> updateComment(
             @PathVariable Long commentId,
-            @RequestBody UpdateCommentRequest request,
+            @RequestBody @Valid UpdateCommentRequest request,
             HttpSession session
     ) {
         Long loginUserId = (Long) session.getAttribute("userId");
