@@ -291,7 +291,7 @@
 
 ### Method / URL
 
-`POST /schedules/{scheduleId}/comment`
+`POST /schedules/{scheduleId}/comments`
 
 ### 인증
 
@@ -346,7 +346,7 @@
 
 ### Method / URL
 
-`GET /schedules/{scheduleId}/comment`
+`GET /schedules/{scheduleId}/comments`
 
 ### Path Variable
 
@@ -395,7 +395,7 @@
 
 ### Method / URL
 
-`PATCH /comment/{commentId}`
+`PATCH /comments/{commentId}`
 
 ### 인증
 
@@ -453,7 +453,7 @@
 
 ### Method / URL
 
-`DELETE /comment/{commentId}`
+`DELETE /comments/{commentId}`
 
 ### 인증
 

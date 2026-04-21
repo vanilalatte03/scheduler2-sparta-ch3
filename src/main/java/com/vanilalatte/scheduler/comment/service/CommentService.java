@@ -24,8 +24,8 @@ public class CommentService {
 
     @Transactional
     public CreateCommentResponse create(Long scheduleId, Long loginUserId, CreateCommentRequest request) {
-        Schedule schedule = scheduleService.findScheduleById(scheduleId);
-        User user = userService.findUserById(loginUserId);
+        Schedule schedule = scheduleService.getScheduleOrThrow(scheduleId);
+        User user = userService.getUserOrThrow(loginUserId);
         Comment comment = new Comment(schedule, user, request.getContent());
         Comment saveComment = commentRepository.save(comment);
         return CreateCommentResponse.from(saveComment);
@@ -33,7 +33,7 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public List<GetCommentResponse> getAll(Long scheduleId) {
-        scheduleService.findScheduleById(scheduleId);
+        scheduleService.getScheduleOrThrow(scheduleId);
 
         return commentRepository.findAllByScheduleId(scheduleId).stream()
                 .map(GetCommentResponse::from)
@@ -42,7 +42,7 @@ public class CommentService {
 
     @Transactional
     public UpdateCommentResponse update(Long commentId, Long loginUserId, UpdateCommentRequest request) {
-        Comment comment = findCommentById(commentId);
+        Comment comment = getCommentOrThrow(commentId);
         comment.validateOwner(loginUserId);
         comment.update(request.getContent());
         return UpdateCommentResponse.from(comment);
@@ -50,13 +50,13 @@ public class CommentService {
 
     @Transactional
     public void delete(Long commentId, Long loginUserId) {
-        Comment comment = findCommentById(commentId);
+        Comment comment = getCommentOrThrow(commentId);
         comment.validateOwner(loginUserId);
         commentRepository.delete(comment);
     }
 
     @Transactional(readOnly = true)
-    public Comment findCommentById(Long commentId) {
+    public Comment getCommentOrThrow(Long commentId) {
         return commentRepository.findById(commentId).orElseThrow(
                 () -> new CommentNotFoundException("존재하지 않는 댓글입니다.")
         );

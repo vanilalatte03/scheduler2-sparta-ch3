@@ -2,6 +2,7 @@ package com.vanilalatte.scheduler.user.controller;
 
 import com.vanilalatte.scheduler.global.util.SessionUtils;
 import com.vanilalatte.scheduler.user.dto.*;
+import com.vanilalatte.scheduler.user.service.AuthService;
 import com.vanilalatte.scheduler.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -19,6 +20,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final AuthService authService;
 
     @PostMapping
     public ResponseEntity<CreateUserResponse> createUser(@RequestBody @Valid CreateUserRequest request) {
@@ -57,7 +59,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody @Valid LoginRequest request, HttpServletRequest httpRequest) {
-        Long userid = userService.login(request.getEmail(), request.getPassword());
+        Long userid = authService.login(request.getEmail(), request.getPassword());
 
         // 로그인 성공 시 세션을 생성하고 userId를 저장한다.
         HttpSession session = httpRequest.getSession(true);
@@ -65,5 +67,4 @@ public class UserController {
 
         return ResponseEntity.ok("로그인 성공");
     }
-
 }

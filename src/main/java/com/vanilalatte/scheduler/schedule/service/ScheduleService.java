@@ -23,7 +23,7 @@ public class ScheduleService {
     @Transactional
     public CreateScheduleResponse create(Long loginUserId, CreateScheduleRequest request) {
         Schedule schedule = new Schedule(
-                userService.findUserById(loginUserId),
+                userService.getUserOrThrow(loginUserId),
                 request.getTitle(),
                 request.getContent()
         );
@@ -44,13 +44,13 @@ public class ScheduleService {
 
     @Transactional(readOnly = true)
     public GetScheduleResponse getOne(Long scheduleId) {
-        Schedule schedule = findScheduleById(scheduleId);
+        Schedule schedule = getScheduleOrThrow(scheduleId);
         return GetScheduleResponse.from(schedule);
     }
 
     @Transactional
     public UpdateScheduleResponse update(Long scheduleId, Long loginUserId, UpdateScheduleRequest request) {
-        Schedule schedule = findScheduleById(scheduleId);
+        Schedule schedule = getScheduleOrThrow(scheduleId);
         schedule.validateOwner(loginUserId);
         schedule.update(request.getTitle(), request.getContent());
         return UpdateScheduleResponse.from(schedule);
@@ -58,13 +58,13 @@ public class ScheduleService {
 
     @Transactional
     public void delete(Long scheduleId, Long loginUserId) {
-        Schedule schedule = findScheduleById(scheduleId);
+        Schedule schedule = getScheduleOrThrow(scheduleId);
         schedule.validateOwner(loginUserId);
         scheduleRepository.delete(schedule);
     }
 
     @Transactional(readOnly = true)
-    public Schedule findScheduleById(Long scheduleId) {
+    public Schedule getScheduleOrThrow(Long scheduleId) {
         return scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new ScheduleNotFoundException("없는 일정입니다.")
         );

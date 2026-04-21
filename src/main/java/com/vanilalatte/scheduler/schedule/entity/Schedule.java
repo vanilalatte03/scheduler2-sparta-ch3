@@ -56,7 +56,7 @@ public class Schedule extends BaseEntity {
      * @throws ForbiddenException 작성자가 아니면 발생
      */
     public void validateOwner(Long loginUserId) {
-        if (!this.user.getId().equals(loginUserId)) {
+        if (!user.getId().equals(loginUserId)) {
             throw new ForbiddenException("해당 권한이 없습니다.");
         }
     }

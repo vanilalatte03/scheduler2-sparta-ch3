@@ -18,7 +18,7 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/schedules/{scheduleId}/comment")
+    @PostMapping("/schedules/{scheduleId}/comments")
     public ResponseEntity<CreateCommentResponse> createComment(
             @PathVariable Long scheduleId,
             @RequestBody @Valid CreateCommentRequest request,
@@ -28,14 +28,14 @@ public class CommentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(commentService.create(scheduleId, loginUserId, request));
     }
 
-    @GetMapping("/schedules/{scheduleId}/comment")
+    @GetMapping("/schedules/{scheduleId}/comments")
     public ResponseEntity<List<GetCommentResponse>> getComments(
             @PathVariable Long scheduleId
     ){
         return ResponseEntity.ok().body(commentService.getAll(scheduleId));
     }
 
-    @PatchMapping("comment/{commentId}")
+    @PatchMapping("/comments/{commentId}")
     private ResponseEntity<UpdateCommentResponse> updateComment(
             @PathVariable Long commentId,
             @RequestBody @Valid UpdateCommentRequest request,
@@ -45,7 +45,7 @@ public class CommentController {
         return ResponseEntity.ok().body(commentService.update(commentId, loginUserId, request));
     }
 
-    @DeleteMapping("comment/{commentId}")
+    @DeleteMapping("/comments/{commentId}")
     private ResponseEntity<Void> deleteComment(
             @PathVariable Long commentId,
             HttpSession session

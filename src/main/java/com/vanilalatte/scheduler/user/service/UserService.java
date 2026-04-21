@@ -43,13 +43,13 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public GetUserResponse getOne(Long userId) {
-        User user = findUserById(userId);
+        User user = getUserOrThrow(userId);
         return GetUserResponse.from(user);
     }
 
     @Transactional
     public UpdateUserResponse update(Long userId, Long loginUserId, UpdateUserRequest request) {
-        User user = findUserById(userId);
+        User user = getUserOrThrow(userId);
         user.validateSameUser(loginUserId);
         validateDuplicatedEmail(request.getEmail(), userId);
 
@@ -59,25 +59,16 @@ public class UserService {
 
     @Transactional
     public void delete(Long userId, Long loginUserId) {
-        User user = findUserById(userId);
+        User user = getUserOrThrow(userId);
         user.validateSameUser(loginUserId);
         userRepository.delete(user);
     }
 
     @Transactional(readOnly = true)
-    public User findUserById(Long userId) {
+    public User getUserOrThrow(Long userId) {
         return userRepository.findById(userId).orElseThrow(
                 () -> new UserNotFoundException("존재하지 않는 유저입니다.")
         );
-    }
-
-    @Transactional(readOnly = true)
-    public Long login(String email, String password) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UnauthorizedException("이메일 또는 비밀번호가 일치하지 않습니다."));
-
-        validatePassword(user, password);
-        return user.getId();
     }
 
     private void validateDuplicatedEmail(String email, Long userId) {
@@ -89,9 +80,4 @@ public class UserService {
                 });
     }
 
-    private void validatePassword(User user, String password) {
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new UnauthorizedException("이메일 또는 비밀번호가 일치하지 않습니다.");
-        }
-    }
 }
